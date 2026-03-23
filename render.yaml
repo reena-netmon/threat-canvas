@@ -3,8 +3,7 @@ services:
   - type: web
     name: threat-canvas-api
     env: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    rootDir: backend
     plan: free
     envVars:
       - key: PYTHONUNBUFFERED
