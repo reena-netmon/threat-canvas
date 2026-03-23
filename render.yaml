@@ -1,0 +1,27 @@
+services:
+  # ── Backend (FastAPI) ────────────────────────────────────────────────────────
+  - type: web
+    name: threat-canvas-api
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+  # ── Frontend (Vite static site) ──────────────────────────────────────────────
+  - type: web
+    name: threat-canvas
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    plan: free
+    buildEnvVars:
+      - key: VITE_API_URL
+        value: https://threat-canvas-api.onrender.com/api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
