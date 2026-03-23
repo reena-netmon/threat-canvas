@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import type { Alert } from '../../types'
 import { useAuth } from '../../contexts/AuthContext'
 import { useSidebar } from '../../contexts/SidebarContext'
-import { useTheme } from '../../contexts/ThemeContext'
+import { useTheme, THEMES, isDarkTheme } from '../../contexts/ThemeContext'
 import SpawnModal from './SpawnModal'
 import ToastNotification from './ToastNotification'
 
@@ -39,7 +39,9 @@ export default function TopBar({ onRefresh }: { onRefresh?: () => void }) {
   const [modalOpen, setModalOpen] = useState(false)
   const [lastAlert, setLastAlert] = useState<Alert | null>(null)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [themeOpen, setThemeOpen] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
+  const themeRef = useRef<HTMLDivElement>(null)
   const headerRef = useRef<HTMLElement>(null)
 
   const updateLeft = useCallback(() => {
@@ -54,11 +56,14 @@ export default function TopBar({ onRefresh }: { onRefresh?: () => void }) {
     return () => window.removeEventListener('resize', updateLeft)
   }, [updateLeft])
 
-  // Close profile dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false)
+      }
+      if (themeRef.current && !themeRef.current.contains(e.target as Node)) {
+        setThemeOpen(false)
       }
     }
     document.addEventListener('mousedown', onClickOutside)
@@ -76,7 +81,9 @@ export default function TopBar({ onRefresh }: { onRefresh?: () => void }) {
   }
 
   const tierColor = TIER_COLOR[user?.tier ?? 'tier1']
-  const { theme, toggleTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
+  const darkThemes = THEMES.filter(t => isDarkTheme(t.id))
+  const lightThemes = THEMES.filter(t => !isDarkTheme(t.id))
 
   return (
     <>
@@ -100,22 +107,73 @@ export default function TopBar({ onRefresh }: { onRefresh?: () => void }) {
             })}
           </span>
 
-          {/* Theme toggle */}
-          <button
-            onClick={toggleTheme}
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            className="flex items-center justify-center w-8 h-8 rounded-lg text-[var(--c-text-muted)] hover:text-[var(--c-text-secondary)] hover:bg-[var(--c-bg-hover)] border border-transparent hover:border-[var(--c-border)] transition-all duration-150 cursor-pointer"
-          >
-            {theme === 'dark' ? (
+          {/* Theme picker */}
+          <div ref={themeRef} className="relative">
+            <button
+              onClick={() => setThemeOpen(o => !o)}
+              title="Change theme"
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-[var(--c-text-muted)] hover:text-[var(--c-text-secondary)] hover:bg-[var(--c-bg-hover)] border border-transparent hover:border-[var(--c-border)] transition-all duration-150 cursor-pointer"
+            >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
-                <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 2a10 10 0 0 1 0 20"/>
+                <path d="M2 12h10"/>
+                <circle cx="12" cy="7" r="1.5" fill="currentColor" stroke="none"/>
+                <circle cx="12" cy="17" r="1.5" fill="currentColor" stroke="none"/>
+                <circle cx="7" cy="12" r="1.5" fill="currentColor" stroke="none"/>
               </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-              </svg>
+            </button>
+
+            {themeOpen && (
+              <div
+                className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-surface)] shadow-2xl overflow-hidden z-50 p-3"
+                style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
+              >
+                <p className="text-[10px] font-semibold text-[var(--c-text-muted)] uppercase tracking-wider mb-2">Dark</p>
+                <div className="grid grid-cols-5 gap-1 mb-3">
+                  {darkThemes.map(t => (
+                    <button
+                      key={t.id}
+                      onClick={() => { setTheme(t.id); setThemeOpen(false) }}
+                      title={t.label}
+                      className="flex flex-col items-center gap-1 p-1 rounded-lg hover:bg-[var(--c-bg-hover)] transition-colors cursor-pointer group"
+                    >
+                      <span
+                        className="w-7 h-7 rounded-full border-2 transition-all"
+                        style={{
+                          background: `linear-gradient(135deg, ${t.bg} 50%, ${t.accent} 50%)`,
+                          borderColor: theme === t.id ? t.accent : 'transparent',
+                          boxShadow: theme === t.id ? `0 0 0 1px ${t.accent}` : 'none',
+                        }}
+                      />
+                      <span className="text-[9px] text-[var(--c-text-muted)] group-hover:text-[var(--c-text-secondary)] leading-none">{t.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] font-semibold text-[var(--c-text-muted)] uppercase tracking-wider mb-2">Light</p>
+                <div className="grid grid-cols-5 gap-1">
+                  {lightThemes.map(t => (
+                    <button
+                      key={t.id}
+                      onClick={() => { setTheme(t.id); setThemeOpen(false) }}
+                      title={t.label}
+                      className="flex flex-col items-center gap-1 p-1 rounded-lg hover:bg-[var(--c-bg-hover)] transition-colors cursor-pointer group"
+                    >
+                      <span
+                        className="w-7 h-7 rounded-full border-2 transition-all"
+                        style={{
+                          background: `linear-gradient(135deg, ${t.bg} 50%, ${t.accent} 50%)`,
+                          borderColor: theme === t.id ? t.accent : 'transparent',
+                          boxShadow: theme === t.id ? `0 0 0 1px ${t.accent}` : 'none',
+                        }}
+                      />
+                      <span className="text-[9px] text-[var(--c-text-muted)] group-hover:text-[var(--c-text-secondary)] leading-none">{t.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
-          </button>
+          </div>
 
           {/* Spawn Alert */}
           <button

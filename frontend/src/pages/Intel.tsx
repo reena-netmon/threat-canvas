@@ -43,7 +43,7 @@ function IpCard({ alert }: { alert: Alert }) {
 export default function Intel() {
   usePageTour('intel')
   const { theme } = useTheme()
-  const dark = theme === 'dark'
+  const dark = theme.startsWith('dark')
 
   const cc = {
     bgBase:     dark ? '#0a0e1a' : '#eef1fb',
