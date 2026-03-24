@@ -1,15 +1,15 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 
 export type Theme =
-  | 'dark' | 'dark-green' | 'dark-red' | 'dark-purple' | 'dark-amber'
+  | 'dark' | 'dark-slate' | 'dark-zinc' | 'dark-carbon' | 'dark-storm'
   | 'light' | 'light-green' | 'light-red' | 'light-purple' | 'light-amber'
 
 export const THEMES: { id: Theme; label: string; accent: string; bg: string }[] = [
   { id: 'dark',         label: 'Navy',      accent: '#5e81f4', bg: '#0f1629' },
-  { id: 'dark-green',   label: 'Terminal',  accent: '#22c55e', bg: '#0d1610' },
-  { id: 'dark-red',     label: 'Crimson',   accent: '#f43f5e', bg: '#170d10' },
-  { id: 'dark-purple',  label: 'Midnight',  accent: '#a855f7', bg: '#100e1c' },
-  { id: 'dark-amber',   label: 'Ember',     accent: '#f59e0b', bg: '#17130a' },
+  { id: 'dark-slate',   label: 'Slate',     accent: '#58a6ff', bg: '#161b22' },
+  { id: 'dark-zinc',    label: 'Zinc',      accent: '#818cf8', bg: '#18181b' },
+  { id: 'dark-carbon',  label: 'Carbon',    accent: '#3b82f6', bg: '#101010' },
+  { id: 'dark-storm',   label: 'Storm',     accent: '#7dd3fc', bg: '#111827' },
   { id: 'light',        label: 'Cloud',     accent: '#4a70ee', bg: '#eef1fb' },
   { id: 'light-green',  label: 'Forest',    accent: '#16a34a', bg: '#f0faf2' },
   { id: 'light-red',    label: 'Rose',      accent: '#e11d48', bg: '#fdf2f4' },
